@@ -2,7 +2,7 @@ import * as drive from '@googleapis/drive'
 import fs, { constants } from 'fs/promises'
 import cron from 'node-cron'
 import path from 'path'
-import sharp from "sharp"
+import sharp from 'sharp'
 import config from './config'
 
 const getPhotos = async () => {
@@ -14,7 +14,7 @@ const getPhotos = async () => {
       ],
     })
 
-    const client = drive.drive({ version: "v3", auth })
+    const client = drive.drive({ version: 'v3', auth })
     const files = await client.files.list({ fields: 'files/id,files/name,files/fileExtension' })
     if (files.data.files == undefined) return
 

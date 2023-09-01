@@ -7,6 +7,25 @@ import './cron'
 
 const app = express()
 
+const parseAuthorization = (value: string | undefined) => {
+  const parts = value?.split(' ')
+  if (!parts || parts.length != 2) return null
+
+  return {
+    scheme: parts[0].toLowerCase(),
+    value: parts[1],
+  }
+}
+
+app.use((req, res, next) => {
+  const authorization = parseAuthorization(req.get('Authorization'))
+  if (authorization?.scheme != 'basic' || authorization?.value != config.apiKey) {
+    return res.status(401).json({ error: 'unauthorised' }).end()
+  }
+
+  return next()
+})
+
 app.get('/images', async (req, res) => {
   await fs.mkdir(config.imageDir, { recursive: true })
   const files = await fs.readdir(config.imageDir, {
