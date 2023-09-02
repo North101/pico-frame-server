@@ -44,11 +44,21 @@ const getPhotos = async () => {
         const filename = path.join(config.imageDir, `${fileId}.jpg`)
         if (await exists(filename)) return
 
-        const download = await client.files.get({ fileId: file.id!, alt: 'media' })
-        const data = download.data as unknown as Blob
+        const download = await client.files.get(
+          { fileId: fileId, alt: 'media' },
+          { responseType: 'arraybuffer' },
+        )
+        const image = download.data as unknown as ArrayBuffer
 
         await fs.mkdir(config.imageDir, { recursive: true })
-        await sharp(await data.arrayBuffer()).resize(800, 480).jpeg().toFile(filename)
+        await sharp(image)
+          .resize({
+            position: 'entropy',
+            width: 800,
+            height: 480,
+          })
+          .jpeg()
+          .toFile(filename)
       })
     )
   } catch (e) {
