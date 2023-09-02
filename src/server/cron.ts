@@ -5,17 +5,28 @@ import path from 'path'
 import sharp from 'sharp'
 import config from './config'
 
+const scopes = [
+  'https://www.googleapis.com/auth/drive.readonly',
+]
+
+const q = config.folderIds
+  .map(folderId => `'${folderId}' in parents`)
+  .join(' or ')
+
+const fields = [
+  'files/id',
+  'files/fileExtension',
+].join(',')
+
 const getPhotos = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
       keyFile: config.credentials,
-      scopes: [
-        'https://www.googleapis.com/auth/drive.readonly',
-      ],
+      scopes,
     })
 
     const client = drive.drive({ version: 'v3', auth })
-    const files = await client.files.list({ fields: 'files/id,files/name,files/fileExtension' })
+    const files = await client.files.list({ q, fields })
     if (files.data.files == undefined) return
 
     await Promise.all(files.data.files
