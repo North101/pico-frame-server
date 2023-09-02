@@ -11,7 +11,7 @@ const listImages = async () => {
     withFileTypes: true,
   })
   return files
-    .filter(file => file.isFile() && config.imageExts.includes(path.extname(file.name)))
+    .filter(file => file.isFile() && path.extname(file.name) == '.jpg')
     .map(file => file.name)
 }
 
