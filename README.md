@@ -23,8 +23,8 @@ FOLDER_IDS=
 # Path to save images to
 IMAGE_DIR=./pico_frame_images/
 
-# Image file extensions
-IMAGE_EXTS=.png,.jpg,.jpeg
+# Supported image mime types
+IMAGE_MIME_TYPES=image/jpeg,image/png,image/gif,image/bmp
 ```
 
 ### Google Cloud Service Account

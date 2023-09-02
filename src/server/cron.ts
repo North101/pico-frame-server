@@ -9,14 +9,20 @@ const scopes = [
   'https://www.googleapis.com/auth/drive.readonly',
 ]
 
-const q = config.folderIds
+const queryMimeTypes = config.imageMimeTypes
+  ?.filter(mimeType => mimeType)
+  .map(mimeType => `mimeType = '${mimeType}'`)
+  .join(' or ')
+
+const queryFolderIds = config.folderIds
+  ?.filter(folderId => folderId)
   .map(folderId => `'${folderId}' in parents`)
   .join(' or ')
 
-const fields = [
-  'files/id',
-  'files/fileExtension',
-].join(',')
+const query = [queryMimeTypes, queryFolderIds,]
+  .filter(e => e)
+  .map(e => `(${e})`)
+  .join(' and ')
 
 const exists = async (filename: string) => {
   return fs.access(filename, constants.F_OK)
@@ -32,11 +38,10 @@ const getPhotos = async () => {
     })
 
     const client = drive.drive({ version: 'v3', auth })
-    const files = await client.files.list({ q, fields })
+    const files = await client.files.list({ q: query })
     if (files.data.files == undefined) return
 
-    await Promise.all(files.data.files
-      .filter(file => config.imageExts.includes(`.${file.fileExtension}`))
+    const tasks = files.data.files
       .map(async (file) => {
         const fileId = file.id
         if (fileId == undefined) return
@@ -60,7 +65,7 @@ const getPhotos = async () => {
           .jpeg()
           .toFile(filename)
       })
-    )
+    await Promise.all(tasks)
   } catch (e) {
     console.error(e)
   }
