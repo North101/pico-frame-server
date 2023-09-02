@@ -18,6 +18,12 @@ const fields = [
   'files/fileExtension',
 ].join(',')
 
+const exists = async (filename: string) => {
+  return fs.access(filename, constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
+}
+
 const getPhotos = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
@@ -32,9 +38,11 @@ const getPhotos = async () => {
     await Promise.all(files.data.files
       .filter(file => config.imageExts.includes(`.${file.fileExtension}`))
       .map(async (file) => {
-        const filename = path.join(config.imageDir, path.basename(file.name!, '.jpg'))
-        const exists = await fs.access(filename, constants.F_OK).then(() => true).catch(() => false)
-        if (exists) return
+        const fileId = file.id
+        if (fileId == undefined) return
+
+        const filename = path.join(config.imageDir, `${fileId}.jpg`)
+        if (await exists(filename)) return
 
         const download = await client.files.get({ fileId: file.id!, alt: 'media' })
         const data = download.data as unknown as Blob

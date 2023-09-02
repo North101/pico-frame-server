@@ -9,7 +9,7 @@ const app = express()
 
 const parseAuthorization = (value: string | undefined) => {
   const parts = value?.split(' ')
-  if (!parts || parts.length != 2) return null
+  if (parts == undefined || parts.length != 2) return null
 
   return {
     scheme: parts[0].toLowerCase(),
