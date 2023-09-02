@@ -71,4 +71,6 @@ const getPhotos = async () => {
   }
 }
 
-cron.schedule('*/5 * * * *', getPhotos)
+cron.schedule('*/5 * * * *', getPhotos, {
+  runOnInit: true,
+})
