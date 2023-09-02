@@ -18,6 +18,8 @@ const parseAuthorization = (value: string | undefined) => {
 }
 
 app.use((req, res, next) => {
+  if (!config.apiKey) return next()
+
   const authorization = parseAuthorization(req.get('Authorization'))
   if (authorization?.scheme != 'basic' || authorization?.value != config.apiKey) {
     return res.status(401).json({ error: 'unauthorised' }).end()
