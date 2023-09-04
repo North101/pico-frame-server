@@ -59,8 +59,8 @@ const getPhotos = async () => {
         await sharp(image)
           .resize({
             position: 'entropy',
-            width: 800,
-            height: 480,
+            width: config.imageWidth,
+            height: config.imageHeight,
           })
           .jpeg()
           .toFile(filename)

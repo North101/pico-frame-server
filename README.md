@@ -1,6 +1,8 @@
 ## PicoFrame Server
 
-This is a server for my PicoFrame. It uses a Google Cloud Service Account to find images uploaded to google drive and then crop and resize them for a [Pimoroni InkyFrame](https://shop.pimoroni.com/search?q=inky%20frame).
+This is a server for my [PicoFrame](https://github.com/north101/pico-frame).
+
+It uses a Google Cloud Service Account to find images uploaded to google drive and then crop and resize them for a [Pimoroni InkyFrame](https://shop.pimoroni.com/search?q=inky%20frame).
 
 ### Config
 
@@ -25,6 +27,12 @@ IMAGE_DIR=./pico_frame_images/
 
 # Supported image mime types
 IMAGE_MIME_TYPES=image/jpeg,image/png,image/gif,image/bmp
+
+# Image height
+IMAGE_HEIGHT=480
+
+# Image width
+IMAGE_WIDTH=800
 ```
 
 ### Google Cloud Service Account

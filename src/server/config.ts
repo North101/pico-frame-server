@@ -7,4 +7,6 @@ export default {
   folderIds: process.env.FOLDER_IDS ? process.env.FOLDER_IDS.split(',') : null,
   imageDir: process.env.IMAGE_DIR!,
   imageMimeTypes: process.env.IMAGE_MIME_TYPES ? process.env.IMAGE_MIME_TYPES.split(',') : null,
+  imageHeight: parseInt(process.env.IMAGE_HEIGHT!),
+  imageWidth: parseInt(process.env.IMAGE_WIDTH!),
 }
