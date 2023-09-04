@@ -4,6 +4,29 @@ This is a server for my [PicoFrame](https://github.com/north101/pico-frame).
 
 It uses a Google Cloud Service Account to find images uploaded to google drive and then crop and resize them for a [Pimoroni InkyFrame](https://shop.pimoroni.com/search?q=inky%20frame).
 
+### Installing
+
+Requirements:
+[Node.js](https://nodejs.org/en)
+
+### Building
+
+```bash
+yarn run build
+```
+
+### Running
+
+Development with hot reload
+```bash
+yarn run dev
+```
+
+Production (after building)
+```bash
+node dist/server/main.js
+```
+
 ### Config
 
 ```
