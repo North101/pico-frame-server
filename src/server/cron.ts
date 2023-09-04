@@ -30,42 +30,51 @@ const exists = async (filename: string) => {
     .catch(() => false)
 }
 
+const formatImageName = (fileId: string) => `${fileId}.jpg`
+
+const listDriveImages = async (client: drive.drive_v3.Drive, nextPageToken?: string): Promise<string[]> => {
+  const result = await client.files.list({ q: query, pageToken: nextPageToken })
+  if (result.data.files == undefined) return []
+
+  const files = [
+    ...result.data.files.map(file => file.id).filter((e): e is string => e != undefined),
+  ]
+  if (result.data.nextPageToken) {
+    files.push(...await listDriveImages(client, result.data.nextPageToken))
+  }
+  return files
+}
+
+const downloadDriveImage = async (client: drive.drive_v3.Drive, fileId: string) => {
+  const filename = path.join(config.imageDir, formatImageName(fileId))
+  if (await exists(filename)) return
+
+  const download = await client.files.get(
+    { fileId: fileId, alt: 'media' },
+    { responseType: 'arraybuffer' },
+  )
+  const image = download.data as unknown as ArrayBuffer
+
+  await fs.mkdir(config.imageDir, { recursive: true })
+  await sharp(image)
+    .resize({
+      position: 'entropy',
+      width: config.imageWidth,
+      height: config.imageHeight,
+    })
+    .jpeg()
+    .toFile(filename)
+}
+
 const getPhotos = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
       keyFile: config.credentials,
       scopes,
     })
-
     const client = drive.drive({ version: 'v3', auth })
-    const files = await client.files.list({ q: query })
-    if (files.data.files == undefined) return
-
-    const tasks = files.data.files
-      .map(async (file) => {
-        const fileId = file.id
-        if (fileId == undefined) return
-
-        const filename = path.join(config.imageDir, `${fileId}.jpg`)
-        if (await exists(filename)) return
-
-        const download = await client.files.get(
-          { fileId: fileId, alt: 'media' },
-          { responseType: 'arraybuffer' },
-        )
-        const image = download.data as unknown as ArrayBuffer
-
-        await fs.mkdir(config.imageDir, { recursive: true })
-        await sharp(image)
-          .resize({
-            position: 'entropy',
-            width: config.imageWidth,
-            height: config.imageHeight,
-          })
-          .jpeg()
-          .toFile(filename)
-      })
-    await Promise.all(tasks)
+    const fileIds = await listDriveImages(client)
+    await Promise.all(fileIds.map((fileId) => downloadDriveImage(client, fileId)))
   } catch (e) {
     console.error(e)
   }

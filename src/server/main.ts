@@ -4,16 +4,7 @@ import path from 'path'
 import ViteExpress from 'vite-express'
 import config from './config'
 import './cron'
-
-const listImages = async () => {
-  await fs.mkdir(config.imageDir, { recursive: true })
-  const files = await fs.readdir(config.imageDir, {
-    withFileTypes: true,
-  })
-  return files
-    .filter(file => file.isFile() && path.extname(file.name) == '.jpg')
-    .map(file => file.name)
-}
+import { listServerImages } from './util'
 
 const app = express()
 
@@ -39,7 +30,7 @@ app.use((req, res, next) => {
 })
 
 app.get('/images', async (req, res) => {
-  const images = await listImages()
+  const images = await listServerImages()
   const data = await Promise.all(images
     .map(async image => {
       const stat = await fs.stat(path.join(config.imageDir, image))
@@ -53,7 +44,7 @@ app.get('/images', async (req, res) => {
 })
 
 app.get('/images/:image', async (req, res) => {
-  const images = await listImages()
+  const images = await listServerImages()
   const image = images.find(file => file == req.params.image)
   if (image == undefined) return res.status(404).end()
 
@@ -61,7 +52,7 @@ app.get('/images/:image', async (req, res) => {
 })
 
 app.get('/random_image', async (req, res) => {
-  const images = await listImages()
+  const images = await listServerImages()
   if (images.length == 0) return res.status(404).end()
 
   const index = Math.floor(Math.random() * images.length)
