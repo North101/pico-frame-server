@@ -56,6 +56,10 @@ IMAGE_HEIGHT=480
 
 # Image width
 IMAGE_WIDTH=800
+
+# cron schedule for syncing photos.
+# See https://crontab.guru/
+SYNC_PHOTOS_SCHEDULE="*/5 * * * *"
 ```
 
 ### Google Cloud Service Account

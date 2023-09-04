@@ -9,4 +9,5 @@ export default {
   imageMimeTypes: process.env.IMAGE_MIME_TYPES ? process.env.IMAGE_MIME_TYPES.split(',') : null,
   imageHeight: parseInt(process.env.IMAGE_HEIGHT!),
   imageWidth: parseInt(process.env.IMAGE_WIDTH!),
+  syncPhotosSchedule: process.env.SYNC_PHOTOS_SCHEDULE!,
 }

@@ -66,7 +66,7 @@ const downloadDriveImage = async (client: drive.drive_v3.Drive, fileId: string) 
     .toFile(filename)
 }
 
-const getPhotos = async () => {
+const syncPhotos = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
       keyFile: config.credentials,
@@ -80,6 +80,6 @@ const getPhotos = async () => {
   }
 }
 
-cron.schedule('*/5 * * * *', getPhotos, {
+cron.schedule(config.syncPhotosSchedule, syncPhotos, {
   runOnInit: true,
 })
