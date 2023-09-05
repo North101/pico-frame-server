@@ -1,9 +1,9 @@
 import * as drive from '@googleapis/drive'
 import fs, { constants } from 'fs/promises'
 import cron from 'node-cron'
-import path from 'path'
 import sharp from 'sharp'
 import config from './config'
+import { fullImagePath, listServerImages } from './util'
 
 const scopes = [
   'https://www.googleapis.com/auth/drive.readonly',
@@ -45,16 +45,7 @@ const listDriveImages = async (client: drive.drive_v3.Drive, nextPageToken?: str
   return files
 }
 
-const downloadDriveImage = async (client: drive.drive_v3.Drive, fileId: string) => {
-  const filename = path.join(config.imageDir, formatImageName(fileId))
-  if (await exists(filename)) return
-
-  const download = await client.files.get(
-    { fileId: fileId, alt: 'media' },
-    { responseType: 'arraybuffer' },
-  )
-  const image = download.data as unknown as ArrayBuffer
-
+const transcodeImage = async (image: ArrayBuffer, filename: string) => {
   await fs.mkdir(config.imageDir, { recursive: true })
   await sharp(image)
     .resize({
@@ -66,7 +57,33 @@ const downloadDriveImage = async (client: drive.drive_v3.Drive, fileId: string) 
     .toFile(filename)
 }
 
-const syncPhotos = async () => {
+const downloadDriveImage = async (client: drive.drive_v3.Drive, fileId: string) => {
+  const download = await client.files.get(
+    { fileId: fileId, alt: 'media' },
+    { responseType: 'arraybuffer' },
+  )
+  const image = download.data as unknown as ArrayBuffer
+  await transcodeImage(image, fullImagePath(formatImageName(fileId)))
+}
+
+const syncAddedDriveImages = async (client: drive.drive_v3.Drive, fileIds: string[], serverImages: string[]) => {
+  return await Promise.all(fileIds
+    .filter(fileId => !serverImages.includes(formatImageName(fileId)))
+    .map((fileId) => downloadDriveImage(client, fileId))
+  )
+}
+
+const deleteImage = (image: string) => fs.rm(fullImagePath(image))
+
+const syncRemovedDriveImages = async (fileIds: string[], serverImages: string[]) => {
+  const driveImages = fileIds.map(formatImageName)
+  return await Promise.all(serverImages
+    .filter(image => !driveImages.includes(image))
+    .map(deleteImage)
+  )
+}
+
+const syncDriveImages = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
       keyFile: config.credentials,
@@ -74,12 +91,16 @@ const syncPhotos = async () => {
     })
     const client = drive.drive({ version: 'v3', auth })
     const fileIds = await listDriveImages(client)
-    await Promise.all(fileIds.map((fileId) => downloadDriveImage(client, fileId)))
+    const serverImages = await listServerImages()
+    await Promise.all([
+      syncAddedDriveImages(client, fileIds, serverImages),
+      syncRemovedDriveImages(fileIds, serverImages),
+    ])
   } catch (e) {
     console.error(e)
   }
 }
 
-cron.schedule(config.syncPhotosSchedule, syncPhotos, {
+cron.schedule(config.syncDriveSchedule, syncDriveImages, {
   runOnInit: true,
 })

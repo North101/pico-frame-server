@@ -1,10 +1,9 @@
 import express from 'express'
 import fs from 'fs/promises'
-import path from 'path'
 import ViteExpress from 'vite-express'
 import config from './config'
 import './cron'
-import { listServerImages } from './util'
+import { fullImagePath, listServerImages } from './util'
 
 const app = express()
 
@@ -33,7 +32,7 @@ app.get('/images', async (req, res) => {
   const images = await listServerImages()
   const data = await Promise.all(images
     .map(async image => {
-      const stat = await fs.stat(path.join(config.imageDir, image))
+      const stat = await fs.stat(fullImagePath(image))
       return {
         file: image,
         uploaded: stat.birthtime.toISOString(),
@@ -48,7 +47,7 @@ app.get('/images/:image', async (req, res) => {
   const image = images.find(file => file == req.params.image)
   if (image == undefined) return res.status(404).end()
 
-  return res.download(path.join(config.imageDir, image))
+  return res.download(fullImagePath(image))
 })
 
 app.get('/random_image', async (req, res) => {
@@ -56,7 +55,7 @@ app.get('/random_image', async (req, res) => {
   if (images.length == 0) return res.status(404).end()
 
   const index = Math.floor(Math.random() * images.length)
-  return res.download(path.join(config.imageDir, images[index]))
+  return res.download(fullImagePath(images[index]))
 })
 
 ViteExpress.listen(app, config.port, () =>
