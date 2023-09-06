@@ -9,12 +9,12 @@ const scopes = [
   'https://www.googleapis.com/auth/drive.readonly',
 ]
 
-const queryMimeTypes = config.imageMimeTypes
+const queryMimeTypes = config.drive.mimeTypes
   ?.filter(mimeType => mimeType)
   .map(mimeType => `mimeType = '${mimeType}'`)
   .join(' or ')
 
-const queryFolderIds = config.folderIds
+const queryFolderIds = config.drive.folderIds
   ?.filter(folderId => folderId)
   .map(folderId => `'${folderId}' in parents`)
   .join(' or ')
@@ -46,12 +46,12 @@ const listDriveImages = async (client: drive.drive_v3.Drive, nextPageToken?: str
 }
 
 const transcodeImage = async (image: ArrayBuffer, filename: string) => {
-  await fs.mkdir(config.imageDir, { recursive: true })
+  await fs.mkdir(config.image.dir, { recursive: true })
   await sharp(image)
     .resize({
       position: 'entropy',
-      width: config.imageWidth,
-      height: config.imageHeight,
+      width: config.image.width,
+      height: config.image.height,
     })
     .jpeg()
     .toFile(filename)
@@ -86,7 +86,7 @@ const syncRemovedDriveImages = async (fileIds: string[], serverImages: string[])
 const syncDriveImages = async () => {
   try {
     const auth = new drive.auth.GoogleAuth({
-      keyFile: config.credentials,
+      keyFile: config.drive.credentials,
       scopes,
     })
     const client = drive.drive({ version: 'v3', auth })

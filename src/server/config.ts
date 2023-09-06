@@ -1,13 +1,18 @@
 import 'dotenv-flow/config'
+import envVar from 'env-var'
 
 export default {
-  port: parseInt(process.env.PORT!),
-  apiKey: process.env.API_KEY!,
-  credentials: process.env.CREDENTIALS!,
-  folderIds: process.env.FOLDER_IDS ? process.env.FOLDER_IDS.split(',') : null,
-  imageDir: process.env.IMAGE_DIR!,
-  imageMimeTypes: process.env.IMAGE_MIME_TYPES ? process.env.IMAGE_MIME_TYPES.split(',') : null,
-  imageHeight: parseInt(process.env.IMAGE_HEIGHT!),
-  imageWidth: parseInt(process.env.IMAGE_WIDTH!),
-  syncDriveSchedule: process.env.SYNC_DRIVE_SCHEDULE!,
+  port: envVar.get('PORT').required().asPortNumber(),
+  apiKey: envVar.get('API_KEY').required().asString(),
+  syncDriveSchedule: envVar.get('SYNC_DRIVE_SCHEDULE').required().asString(),
+  drive: {
+    credentials: envVar.get('CREDENTIALS').required().asString(),
+    folderIds: envVar.get('FOLDER_IDS').asArray(','),
+    mimeTypes: envVar.get('IMAGE_MIME_TYPES').asArray(','),
+  },
+  image: {
+    dir: envVar.get('IMAGE_DIR').required().asString(),
+    height: envVar.get('IMAGE_HEIGHT').required().asIntPositive(),
+    width: envVar.get('IMAGE_WIDTH').required().asIntPositive(),
+  },
 }
