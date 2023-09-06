@@ -85,17 +85,20 @@ const syncRemovedDriveImages = async (fileIds: string[], serverImages: string[])
 
 const syncDriveImages = async () => {
   try {
+    console.log('Syncing Drive Images')
     const auth = new drive.auth.GoogleAuth({
       keyFile: config.drive.credentials,
       scopes,
     })
     const client = drive.drive({ version: 'v3', auth })
     const fileIds = await listDriveImages(client)
+    console.log(`Found ${fileIds.length} images`)
     const serverImages = await listServerImages()
     await Promise.all([
       syncAddedDriveImages(client, fileIds, serverImages),
       syncRemovedDriveImages(fileIds, serverImages),
     ])
+    console.log('Done')
   } catch (e) {
     console.error(e)
   }
