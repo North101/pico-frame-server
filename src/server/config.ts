@@ -3,12 +3,15 @@ import envVar from 'env-var'
 
 export default {
   port: envVar.get('PORT').required().asPortNumber(),
-  apiKey: envVar.get('API_KEY').required().asString(),
-  syncDriveSchedule: envVar.get('SYNC_DRIVE_SCHEDULE').required().asString(),
+  apiKey: envVar.get('API_KEY').asString(),
+  syncDrive: {
+    schedule: envVar.get('SYNC_DRIVE_SCHEDULE').asString(),
+    immediately: envVar.get('SYNC_DRIVE_IMMEDIATELY').asBool() ?? false,
+  },
   drive: {
     credentials: envVar.get('CREDENTIALS').required().asString(),
-    folderIds: envVar.get('FOLDER_IDS').asArray(','),
-    mimeTypes: envVar.get('IMAGE_MIME_TYPES').asArray(','),
+    folderIds: envVar.get('FOLDER_IDS').asArray(',') ?? [],
+    mimeTypes: envVar.get('IMAGE_MIME_TYPES').asArray(',') ?? [],
   },
   image: {
     dir: envVar.get('IMAGE_DIR').required().asString(),

@@ -10,12 +10,12 @@ const scopes = [
 ]
 
 const queryMimeTypes = config.drive.mimeTypes
-  ?.filter(mimeType => mimeType)
+  .filter(mimeType => mimeType)
   .map(mimeType => `mimeType = '${mimeType}'`)
   .join(' or ')
 
 const queryFolderIds = config.drive.folderIds
-  ?.filter(folderId => folderId)
+  .filter(folderId => folderId)
   .map(folderId => `'${folderId}' in parents`)
   .join(' or ')
 
@@ -104,6 +104,9 @@ const syncDriveImages = async () => {
   }
 }
 
-cron.schedule(config.syncDriveSchedule, syncDriveImages, {
-  runOnInit: true,
-})
+if (config.syncDrive.schedule) {
+  cron.schedule(config.syncDrive.schedule, syncDriveImages)
+}
+if (config.syncDrive.immediately) {
+  syncDriveImages()
+}

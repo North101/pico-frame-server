@@ -58,8 +58,11 @@ IMAGE_HEIGHT=480
 IMAGE_WIDTH=800
 
 # cron schedule for syncing drive files.
-# See https://crontab.guru/
+# See https://crontab.guru/#*/5_*_*_*_*
 SYNC_DRIVE_SCHEDULE="*/5 * * * *"
+
+# Whether to sync drive on start up
+SYNC_DRIVE_IMMEDIATELY=false
 ```
 
 ### Google Cloud Service Account
